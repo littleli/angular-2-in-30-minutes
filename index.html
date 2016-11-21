@@ -56,6 +56,8 @@ Aleš Najmann<br>
 <li>Dependency Injection</li>
 <li>Directives</li>
 <li>Modules</li>
+<li>Routing</li>
+<li>Pipes</li>
 </ul>
 </section>
 
@@ -65,6 +67,9 @@ Aleš Najmann<br>
 <h2>Components</h2>
 <p>
 Components are marked with <code>@Component</code> decorator which contains additional metadata
+</p>
+<p>
+The metadata tells Angular where to get the major building blocks you specify for the component.
 </p>
 <pre><code data-trim>
 @Component({
@@ -80,36 +85,200 @@ export class SimpleButton {
 </section>
 
 <section>
-<h2>Metadata</h2>
+<h2>Template</h2>
 <p>
 </p>
 <pre><code data-trim>
-&nbsp;
+&lt;p&gt;&lt;i&gt;Pick a hero from the list&lt;/i&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li *ngFor=&quot;let hero of heroes&quot; (click)=&quot;selectHero(hero)&quot;&gt;
+    {{hero.name}}
+  &lt;/li&gt;
+&lt;/ul&gt;
+&lt;hero-detail *ngIf=&quot;selectedHero&quot; [hero]=&quot;selectedHero&quot;&gt;&lt;/hero-detail&gt;
 </code></pre>
 </section>
 
 <section>
-<h2>Template</h2>
-<p>
-</p>
+<h2>Data binding</h2>
+<img src="https://angular.io/resources/images/devguide/architecture/databinding.png">
+<p>What does it even mean?</p>
 </section>
 
 <section>
-<h2>Data binding</h2>
-<p>
-</p>
+<h2>Data binding cont.</h2>
+<ul>
+	<li>Interpolation: <code>{{obj.name}}</code></li>
+	<li>Property binding: <code>[member]</code></li>
+	<li>Event binding: <code>(click)="pickOne(data)"</code></li>
+	<li>Two-way binding: <code>[(banana)]</code></li>
+</ul>
+</section>
 </section>
 
-</section>
-
+<section>
 <section>
 <h2>Services</h2>
-<p></p>
+<p>Reusable business logic</p>
+<p>Almost anything can be a service. A service is typically a class with a narrow, well-defined purpose.</p>
+<p>Decorated with <code>@Injectable()</code> decorator to participate in Dependency injection</p>
 </section>
 
 <section>
+<h2>Service example</h2>
+<pre><code data-trim>
+@Injectable()
+export class SuperService {
+  doTrick() {...}
+  doAnotherTrick(a: number, b: number) {...}
+}
+</code></pre>
+</section>
+</section>
+
+<section>
+<section>
 <h2>Dependency Injection</h2>
-<p></p>
+<img src="injection.jpg">
+</section>
+
+<section>
+<h2>Dependency injection</h2>
+<pre><code data-trim>
+@Component({
+  selector: 'time-picker', template: '<div></div>',
+  providers: [TimePickerService]
+})
+export class TimePicker {
+  constructor(private service: TimePickerService)
+  //                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ngOnInit() { this.service.pick(); }
+  //           ^^^^^^^^^^^^^^^^^^^ use dependency       
+}
+
+@Injectable()
+export class TimePickerService {	
+  pick() {...}
+}
+</code></pre>
+</section>
+
+<section>
+<h2>Dependency injection</h2>
+<pre><code data-trim>
+@Injectable()
+export class TimePickerService {
+  constructor(private conversion: ConversionService) {}	
+  pick() { this.conversion.convert(10); }
+}
+
+@Injectable()
+export class ConversionService {
+  constructor() {...}
+  convert(a: number): string {...}
+}
+</code></pre>
+</section>
+
+</section>
+
+<section>
+<section>
+<h2>Directives</h2>
+<p>
+Transform the DOM based on given instructions. 
+</p>
+<ul>
+<li>structural directives</li>
+<li>attribute directives</li>
+</ul>
+</section>
+
+<section>
+<h2>Structural directives</h2>
+<p>they alter layout by adding, removing, and replacing elements in DOM.</p>
+<pre><code data-trim>
+&lt;li *ngFor=&quot;let hero of heroes&quot;&gt;&lt;/li&gt;
+&lt;hero-detail *ngIf=&quot;selectedHero&quot;&gt;&lt;/hero-detail&gt;
+</code></pre>
+</section>
+
+<section>
+<h2>Attribute directives</h2>
+<p>they alter the appearance or behavior of an existing element. 
+In templates they look like regular HTML attributes, hence the name.</p>
+<ul>
+<li>ngStyle</li>
+<li>ngClass</li>
+<li>ngSwitch</li>
+<li>ngForm</li>
+</ul>
+<pre><code data-trim>
+<div [style.color]="isSpecial ? 'red' : 'green'">Signal</div>
+<div [class.disabled]="isDisabled">Disable me</div>
+</code></pre>
+<a href="https://angular.io/docs/ts/latest/guide/template-syntax.html#!#directives">Builtin directives<sup>*</sup></a>
+</section>
+
+<section>
+<h2>ngForm</h2>
+<p>Equals roughly to</p>
+<pre><code data-trim>
+&lt;input
+  [ngModel]="firstName"
+  (ngModelChange)="firstName = $event"&gt;
+</code></pre>
+<p>
+Only works for specific form elements
+</p>
+</section>
+</section>
+
+<section>
+<h2>Modules</h2>
+<pre><code data-trim>
+@NgModule({
+  imports: [ BrowserModule ],
+  declarations: [ AppComponent ],
+  bootstrap: [ AppComponent ],
+  providers: [ AppService ]
+})
+export class AppModule {}
+</code></pre>
+</section>
+
+<section>
+<h2>Routing</h2>
+<p>Routing</p>
+<pre><code data-trim>
+const appRoutes: Routes = [
+  { path: 'hero/:id', component: HeroDetailComponent },
+  { path: 'crisis-center', component: CrisisListComponent },
+  {
+    path: 'heroes',
+    component: HeroListComponent,
+    data: {
+      title: 'Heroes List'
+    }
+  },
+  { path: '', component: HomeComponent },
+  { path: '**', component: PageNotFoundComponent }
+];
+
+@NgModule({
+  imports: [ ...
+    RouterModule.forRoot(appRoutes)	  
+  ]
+})
+</code></pre>
+</section>
+
+<section>
+<h2>Pipes</h2>
+<p>What is pipe?</p>
+<pre><code data-trim>
+<p>The hero's birthday is {{ birthday | date:"MM/dd/yy" }} </p>
+</code></pre>
 </section>
 
 <section>
